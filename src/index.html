@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+    <title>HWI Electron Compare</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <h1>Helisul Engenharia - HWI Diagnóstico</h1>
+          <p class="subtitle" style="margin-top: 20px;">
+            <span id="analysisStatus" class="status status-neutral">Aguardando entrada.</span>
+          </p>
+          <!-- <p class="subtitle">
+            Importe os relatórios CSV, carregue o perfil de hardware e visualize os resultados
+            em abas dedicadas com tabelas comparativas e gráficos interativos.
+          </p> -->
+        </div>
+        <div class="hero-actions">
+          <div class="theme-switcher">
+            <button id="themeToggleButton" type="button" class="theme-toggle" aria-haspopup="true" aria-expanded="false">
+              <span class="theme-dot"></span>
+              <span>Personalizar tema</span>
+            </button>
+            <div id="themePanel" class="theme-panel" data-theme-panel hidden>
+              <div class="theme-panel-header">
+                <div>
+                  <p class="theme-panel-eyebrow">Ajustes rápidos</p>
+                  <h4>Paleta do app</h4>
+                </div>
+                <button id="themePanelClose" type="button" class="theme-close-button" aria-label="Fechar painel">
+                  &times;
+                </button>
+              </div>
+              <div class="theme-presets" role="radiogroup" aria-label="Modelos de tema">
+                <label class="theme-preset">
+                  <input type="radio" name="themePreset" value="midnight" checked />
+                  <span>Midnight</span>
+                </label>
+                <label class="theme-preset">
+                  <input type="radio" name="themePreset" value="sunrise" />
+                  <span>Sunrise</span>
+                </label>
+                <label class="theme-preset">
+                  <input type="radio" name="themePreset" value="emerald" />
+                  <span>Emerald</span>
+                </label>
+              </div>
+              <div class="theme-custom">
+                <label class="theme-field">
+                  <span>Cor de destaque</span>
+                  <input type="color" id="themeAccentInput" value="#60a5fa" />
+                </label>
+                <label class="theme-field">
+                  <span>Transparência das superfícies</span>
+                  <input type="range" id="themeSurfaceRange" min="0.55" max="0.95" step="0.05" value="0.85" />
+                </label>
+              </div>
+              <button id="themeApplyButton" type="button" class="theme-apply-button">Salvar tema</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls">
+        <div class="control-card">
+          <p class="control-label">Hardware do sistema</p>
+          <button id="loadHardwareButton" type="button">Carregar hardware</button>
+          <span id="hardwareFileLabel" class="file-hint">Nenhum arquivo selecionado.</span>
+        </div>
+        <div class="control-card">
+          <p class="control-label">Relatórios HWiNFO</p>
+          <button id="loadReportsButton" type="button">Selecionar relatórios</button>
+          <div id="selectedReportsList" class="file-list">Nenhum relatório selecionado.</div>
+        </div>
+        <div class="control-card">
+          <p class="control-label">TjMAX alvo (°C)</p>
+          <input id="tjmaxInput" type="number" min="0" step="1" value="100" />
+          <small class="control-subtext">
+            Esse valor é usado para calcular o thermal headroom mínimo apresentado na análise.
+          </small>
+        </div>
+        <div class="control-card action-card">
+          <div class="action-buttons">
+            <button id="analyzeButton" type="button">Analisar relatórios</button>
+            <button id="exportPdfButton" type="button" disabled>Exportar PDF</button>
+          </div>
+          
+        </div>
+      </section>
+
+      <section class="tab-bar">
+        <button class="tab-button active" data-tab-target="hardwareTab">Hardware do sistema</button>
+        <button class="tab-button" data-tab-target="summaryTab">Resumo detalhado</button>
+        <button class="tab-button" data-tab-target="comparisonTab">Comparação lado a lado</button>
+        <button class="tab-button" data-tab-target="chartsTab">Gráficos</button>
+      </section>
+
+      <section class="tab-panels">
+        <div id="hardwareTab" class="tab-panel active" data-tab-panel>
+          <div class="hardware-grid">
+            <div id="hardwareCards" class="hardware-cards"></div>
+            <pre id="hardwareLines" class="hardware-lines">Nenhum perfil carregado.
+Use o botão "Carregar hardware" para importar o arquivo CSV do HWiNFO.</pre>
+          </div>
+        </div>
+
+        <div id="summaryTab" class="tab-panel" data-tab-panel>
+          <div id="summaryContent" class="summary-grid">
+            <p class="placeholder">Execute uma análise para ver os resumos individuais dos relatórios.</p>
+          </div>
+        </div>
+
+        <div id="comparisonTab" class="tab-panel" data-tab-panel>
+          <div id="comparisonContent" class="comparison-content">
+            <p class="placeholder">Os resultados comparativos aparecerão aqui após a análise.</p>
+          </div>
+        </div>
+
+        <div id="chartsTab" class="tab-panel" data-tab-panel>
+          <div class="chart-tab">
+            <aside class="chart-sidebar">
+              <h3>Categorias</h3>
+              <div id="chartCategories" class="chart-category-list">
+                <span class="placeholder">A análise dos relatórios carrega os gráficos.</span>
+            </div>
+            </aside>
+            <div class="chart-main">
+              <div id="chartFilters" class="chart-filter-layout" aria-label="Filtros de métricas">
+                <div id="chartMetricFilters" class="chart-filter-row" aria-label="Filtros por métrica"></div>
+                <div id="chartReportFilters" class="chart-filter-row" aria-label="Filtros por relatório"></div>
+              </div>
+              <canvas id="categoryChart" aria-label="Gráfico de métricas" role="img"></canvas>
+              <p id="chartMessage" class="chart-message">
+                O gráfico será exibido aqui assim que a análise gerar séries de dados. Use a legenda
+                para ativar/desativar cada conjunto.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer-note">
+        
+      </footer>
+    </div>
+    <script src="../node_modules/chart.js/dist/chart.umd.js"></script>
+    <script type="module" src="./renderer.js"></script>
+  </body>
+</html>

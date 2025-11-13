@@ -1,0 +1,20 @@
+{
+  "name": "hwi_electron",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "electron": "^39.1.2"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "fast-xml-parser": "^4.0.12",
+    "papaparse": "^5.5.3"
+  }
+}
