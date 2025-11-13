@@ -25,65 +25,139 @@ const CHART_CATEGORIES = {
   ]
 };
 
+function collectGpuVariants(reports = []) {
+  const variants = new Map();
+  reports.forEach((report) => {
+    const devices = report.metrics?.gpuDevices ?? [];
+    devices.forEach((device, index) => {
+      const order = device.index != null ? device.index : index + 1;
+      const key = device.key || `gpu-${order}`;
+      if (!variants.has(key)) {
+        variants.set(key, {
+          key,
+          order,
+          name: device.name || `GPU #${order}`
+        });
+      }
+    });
+  });
+  return Array.from(variants.values()).sort((a, b) => {
+    if (a.order != null && b.order != null) {
+      return a.order - b.order;
+    }
+    if (a.order != null) {
+      return -1;
+    }
+    if (b.order != null) {
+      return 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}
+
 function createChartDataBuilder({ sanitizeValue, clampPercent }) {
   if (typeof sanitizeValue !== 'function' || typeof clampPercent !== 'function') {
     throw new Error('Missing helpers for chart data builder.');
   }
 
-  return function buildChartData(reports) {
-    const categoryData = {};
-    Object.entries(CHART_CATEGORIES).forEach(([categoryName, metrics]) => {
-      const datasets = [];
-      let maxPoints = 0;
-      const units = new Set();
-      metrics.forEach((metric) => {
-        reports.forEach((report) => {
-          const column = report.resolved[metric.alias];
-          if (!column) {
-            return;
+  function buildCategoryDataset(reports, metrics, options = {}) {
+    const datasets = [];
+    let maxPoints = 0;
+    const units = new Set();
+
+    metrics.forEach((metric) => {
+      reports.forEach((report) => {
+        const entries = report.aliasEntries?.[metric.alias];
+        if (!entries || !entries.length) {
+          return;
+        }
+        let entry = entries[0];
+        if (options.gpuKey) {
+          entry = entries.find(
+            (candidate) => candidate.sensorInfo?.type === 'gpu' && candidate.sensorInfo.key === options.gpuKey
+          );
+        }
+        if (!entry) {
+          return;
+        }
+        const values = report.rows.map((row) => {
+          const numeric = sanitizeValue(metric.alias, row[entry.header]);
+          if (!Number.isFinite(numeric)) {
+            return null;
           }
-          const values = report.rows.map((row) => {
-            const numeric = sanitizeValue(metric.alias, row[column]);
-            if (!Number.isFinite(numeric)) {
-              return null;
-            }
-            if (metric.unit === '%') {
-              return clampPercent(numeric);
-            }
-            return numeric;
-          });
-          if (!values.some((entry) => entry !== null)) {
-            return;
+          if (metric.unit === '%') {
+            return clampPercent(numeric);
           }
-          maxPoints = Math.max(maxPoints, values.length);
-          if (metric.unit) {
-            units.add(metric.unit);
-          }
-          datasets.push({
-            label: `${report.name} · ${metric.label}`,
-            reportName: report.name,
-            metricLabel: metric.label,
-            unit: metric.unit || '',
-            data: values,
-            fill: false,
-            tension: 0.2,
-            pointRadius: 2,
-            spanGaps: true
-          });
+          return numeric;
+        });
+        if (!values.some((value) => value !== null)) {
+          return;
+        }
+        maxPoints = Math.max(maxPoints, values.length);
+        if (metric.unit) {
+          units.add(metric.unit);
+        }
+        datasets.push({
+          label: `${report.name} · ${metric.label}`,
+          reportName: report.name,
+          metricLabel: metric.label,
+          unit: metric.unit || '',
+          data: values,
+          fill: false,
+          tension: 0.2,
+          pointRadius: 2,
+          spanGaps: true
         });
       });
-      if (!datasets.length) {
-        return;
-      }
-      categoryData[categoryName] = {
-        labels: Array.from({ length: maxPoints }, (_, index) => index + 1),
-        datasets,
-        yAxisTitle: [...units].join(' / ') || '',
-        percMode:
-          metrics.every((metric) => metric.unit === '%') && metrics.some((metric) => metric.unit)
-      };
     });
-    return categoryData;
+
+    if (!datasets.length) {
+      return null;
+    }
+
+    return {
+      labels: Array.from({ length: maxPoints }, (_, index) => index + 1),
+      datasets,
+      yAxisTitle: [...units].join(' / ') || '',
+      percMode:
+        metrics.every((metric) => metric.unit === '%') && metrics.some((metric) => metric.unit)
+    };
+  }
+
+  return function buildChartPayload(reports) {
+    const charts = {};
+    const categories = [];
+    const gpuVariants = collectGpuVariants(reports);
+
+    Object.entries(CHART_CATEGORIES).forEach(([categoryName, metrics]) => {
+      if (categoryName === 'GPU') {
+        if (gpuVariants.length) {
+          gpuVariants.forEach((variant) => {
+            const displayName =
+              variant.order != null ? `GPU #${variant.order} - ${variant.name}` : `GPU - ${variant.name}`;
+            const data = buildCategoryDataset(reports, metrics, { gpuKey: variant.key });
+            if (data) {
+              charts[displayName] = data;
+              categories.push({ name: displayName, metrics, gpuKey: variant.key });
+            }
+          });
+        } else {
+          const data = buildCategoryDataset(reports, metrics);
+          if (data) {
+            charts[categoryName] = data;
+            categories.push({ name: categoryName, metrics });
+          }
+        }
+      } else {
+        const data = buildCategoryDataset(reports, metrics);
+        if (data) {
+          charts[categoryName] = data;
+          categories.push({ name: categoryName, metrics });
+        }
+      }
+    });
+
+    return { charts, categories };
   };
 }
 

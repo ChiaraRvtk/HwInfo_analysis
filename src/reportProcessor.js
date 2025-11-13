@@ -161,39 +161,147 @@ function parseCapacity(value) {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-function buildResolver(headers) {
+function parseSensorLabel(label = '') {
+  if (typeof label !== 'string') {
+    return null;
+  }
+  const trimmed = label.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const gpuMatch = trimmed.match(/gpu\s*\[#(\d+)\]\s*:\s*(.+)/i);
+  if (gpuMatch) {
+    const index = Number(gpuMatch[1]);
+    const name = gpuMatch[2].trim();
+    const keyBase = Number.isFinite(index) ? `gpu-${index}` : normalize(name) || trimmed;
+    return {
+      type: 'gpu',
+      index: Number.isFinite(index) ? index : null,
+      name,
+      label: trimmed,
+      key: keyBase || `gpu-${trimmed.toLowerCase()}`
+    };
+  }
+  return {
+    type: 'other',
+    name: trimmed,
+    label: trimmed,
+    key: normalize(trimmed) || trimmed.toLowerCase()
+  };
+}
+
+function collectGpuSensors(aliasEntries = {}) {
+  const sensors = new Map();
+  Object.values(aliasEntries).forEach((entries) => {
+    entries.forEach((entry) => {
+      const info = entry.sensorInfo;
+      if (info?.type === 'gpu') {
+        const key = info.key || entry.header;
+        if (!sensors.has(key)) {
+          sensors.set(key, {
+            key,
+            index: info.index,
+            name: info.name || info.label || null,
+            label: info.label || null
+          });
+        }
+      }
+    });
+  });
+  return Array.from(sensors.values()).sort((a, b) => {
+    if (a.index != null && b.index != null) {
+      return a.index - b.index;
+    }
+    if (a.index != null) {
+      return -1;
+    }
+    if (b.index != null) {
+      return 1;
+    }
+    const nameA = a.name || a.label || a.key;
+    const nameB = b.name || b.label || b.key;
+    return nameA.localeCompare(nameB);
+  });
+}
+
+function buildResolver(headers, columnSensors = {}) {
   const map = {};
   headers.forEach((header) => {
     const key = normalize(header);
     if (!key) {
       return;
     }
+    const entry = {
+      header,
+      normalized: key,
+      sensorLabel: columnSensors[header] || null,
+      sensorInfo: parseSensorLabel(columnSensors[header])
+    };
     if (!map[key]) {
-      map[key] = header;
+      map[key] = [];
     }
+    map[key].push(entry);
   });
   return map;
 }
 
-function resolveColumn(resolver, candidates) {
-  for (const candidate of candidates) {
-    const normalized = normalize(candidate);
-    if (!normalized) {
-      continue;
-    }
-    if (resolver[normalized]) {
-      return resolver[normalized];
-    }
-  }
-  for (const candidate of candidates) {
-    const normalized = normalize(candidate);
-    for (const key of Object.keys(resolver)) {
-      if (normalized && key.includes(normalized)) {
-        return resolver[key];
+function resolveColumnEntries(resolver, candidates, predicate = () => true) {
+  const normalizedCandidates = candidates.map((candidate) => normalize(candidate)).filter(Boolean);
+  const seen = new Set();
+  const matches = [];
+
+  function addEntries(entries) {
+    entries.forEach((entry) => {
+      if (!entry || seen.has(entry.header)) {
+        return;
       }
-    }
+      if (predicate(entry)) {
+        seen.add(entry.header);
+        matches.push(entry);
+      }
+    });
   }
-  return null;
+
+  normalizedCandidates.forEach((candidate) => {
+    const entries = resolver[candidate];
+    if (entries) {
+      addEntries(entries);
+    }
+  });
+
+  if (!matches.length) {
+    Object.keys(resolver).forEach((key) => {
+      if (normalizedCandidates.some((candidate) => candidate && key.includes(candidate))) {
+        addEntries(resolver[key]);
+      }
+    });
+  }
+
+  return matches;
+}
+
+function resolveColumn(resolver, candidates, predicate) {
+  const match = resolveColumnEntries(resolver, candidates, predicate)[0];
+  return match ? match.header : null;
+}
+
+function isSensorDescriptorRow(row) {
+  if (!row || typeof row !== 'object') {
+    return false;
+  }
+  const date = typeof row.Date === 'string' ? row.Date.trim() : row.Date;
+  const time = typeof row.Time === 'string' ? row.Time.trim() : row.Time;
+  if (date || time) {
+    return false;
+  }
+  const values = Object.values(row)
+    .filter((value) => typeof value === 'string' && value.trim())
+    .map((value) => value.trim());
+  if (!values.length) {
+    return false;
+  }
+  const descriptorCount = values.filter((value) => value.includes(':')).length;
+  return descriptorCount >= Math.min(10, Math.ceil(values.length * 0.5));
 }
 
 function parseCsv(filePath) {
@@ -202,7 +310,28 @@ function parseCsv(filePath) {
     header: true,
     skipEmptyLines: true
   });
-  return parsed.data;
+  const headers = parsed.meta?.fields ?? [];
+  let sensorRow = null;
+  const rows = [];
+  parsed.data.forEach((row) => {
+    if (sensorRow == null && isSensorDescriptorRow(row)) {
+      sensorRow = row;
+      return;
+    }
+    if (row && (row.Date || row.Time)) {
+      rows.push(row);
+    }
+  });
+  const columnSensors = {};
+  if (sensorRow) {
+    headers.forEach((header) => {
+      const label = sensorRow[header];
+      if (typeof label === 'string' && label.trim()) {
+        columnSensors[header] = label.trim();
+      }
+    });
+  }
+  return { rows, columnSensors, headers };
 }
 
 function toNumber(value) {
@@ -289,24 +418,43 @@ function sanitizeValue(alias, value) {
 const buildChartData = createChartDataBuilder({ sanitizeValue, clampPercent });
 
 function analyzeReport(filePath, tjmax) {
-  const rows = parseCsv(filePath);
-  const resolver = buildResolver(rows.length ? Object.keys(rows[0]) : []);
+  const { rows, columnSensors, headers } = parseCsv(filePath);
+  const headerList = headers?.length
+    ? headers
+    : rows.length
+      ? Object.keys(rows[0])
+      : [];
+  const resolver = buildResolver(headerList, columnSensors);
   const resolved = {};
+  const aliasEntries = {};
   Object.entries(COLUMN_ALIASES).forEach(([alias, candidates]) => {
-    const column = resolveColumn(resolver, candidates);
-    if (column) {
-      resolved[alias] = column;
+    const entries = resolveColumnEntries(resolver, candidates);
+    if (entries.length) {
+      aliasEntries[alias] = entries;
+      resolved[alias] = entries[0].header;
     }
   });
+  const gpuSensors = collectGpuSensors(aliasEntries);
 
   const metrics = {};
 
-  function getSeries(alias) {
-    const column = resolved[alias];
-    if (!column) {
+  function getSeries(alias, selector) {
+    const entries = aliasEntries[alias];
+    if (!entries || !entries.length) {
       return [];
     }
-    return rows.map((row) => sanitizeValue(alias, row[column]));
+    const entry = selector ? entries.find(selector) : entries[0];
+    if (!entry) {
+      return [];
+    }
+    return rows.map((row) => sanitizeValue(alias, row[entry.header]));
+  }
+
+  function getGpuSeries(alias, gpuKey) {
+    return getSeries(
+      alias,
+      (entry) => entry.sensorInfo?.type === 'gpu' && entry.sensorInfo.key === gpuKey
+    );
   }
 
   const cpuPower = getSeries('cpu_power');
@@ -448,6 +596,94 @@ function analyzeReport(filePath, tjmax) {
     metrics.gpu_memory_usage_max = clampPercent(stats.max);
   }
 
+  const gpuDevices = gpuSensors
+    .map((sensor, index) => {
+      const accessSeries = (alias) => getGpuSeries(alias, sensor.key);
+      const device = {
+        key: sensor.key,
+        index: sensor.index != null ? sensor.index : index + 1,
+        name: sensor.name || sensor.label || `GPU #${sensor.index ?? index + 1}`
+      };
+
+      const powerSeries = accessSeries('gpu_power');
+      if (powerSeries.length) {
+        const stats = computeBoundedStats(powerSeries, { min: 0, max: 2000 });
+        device.power_avg = stats.avg;
+        device.power_max = stats.max;
+      }
+
+      const clockSeries = accessSeries('gpu_clock');
+      if (clockSeries.length) {
+        device.clock_avg = computeStats(clockSeries)?.avg;
+      }
+
+      const usageSeries = accessSeries('gpu_d3d_usage');
+      if (usageSeries.length) {
+        const stats = computeBoundedStats(usageSeries, { min: 0, max: 100 });
+        device.usage_avg = clampPercent(stats.avg);
+        device.usage_max = clampPercent(stats.max);
+      }
+
+      const tempSeries = accessSeries('gpu_temp');
+      if (tempSeries.length) {
+        const stats = computeBoundedStats(tempSeries, { min: -20, max: 130 });
+        device.temp_avg = stats.avg;
+        device.temp_max = stats.max;
+      }
+
+      const memoryUsageSeries = accessSeries('gpu_memory_usage');
+      if (memoryUsageSeries.length) {
+        const stats = computeBoundedStats(memoryUsageSeries, { min: 0, max: 100 });
+        device.memory_usage_avg = clampPercent(stats.avg);
+        device.memory_usage_max = clampPercent(stats.max);
+      }
+
+      const hasData = [
+        device.power_avg,
+        device.clock_avg,
+        device.usage_avg,
+        device.temp_avg,
+        device.memory_usage_avg
+      ].some((value) => value != null && !Number.isNaN(value));
+
+      return hasData ? device : null;
+    })
+    .filter(Boolean);
+
+  if (gpuDevices.length) {
+    metrics.gpuDevices = gpuDevices;
+    const primary = gpuDevices[0];
+    if (primary) {
+      if (primary.power_avg != null) {
+        metrics.gpu_power_avg = primary.power_avg;
+      }
+      if (primary.power_max != null) {
+        metrics.gpu_power_max = primary.power_max;
+      }
+      if (primary.clock_avg != null) {
+        metrics.gpu_clock_avg = primary.clock_avg;
+      }
+      if (primary.usage_avg != null) {
+        metrics.gpu_d3d_usage_avg = primary.usage_avg;
+      }
+      if (primary.usage_max != null) {
+        metrics.gpu_d3d_usage_max = primary.usage_max;
+      }
+      if (primary.temp_avg != null) {
+        metrics.gpu_temp_avg = primary.temp_avg;
+      }
+      if (primary.temp_max != null) {
+        metrics.gpu_temp_max = primary.temp_max;
+      }
+      if (primary.memory_usage_avg != null) {
+        metrics.gpu_memory_usage_avg = primary.memory_usage_avg;
+      }
+      if (primary.memory_usage_max != null) {
+        metrics.gpu_memory_usage_max = primary.memory_usage_max;
+      }
+    }
+  }
+
   if (metrics.fps_stats.avg && metrics.cpu_power_avg && metrics.gpu_power_avg) {
     const totalPower = metrics.cpu_power_avg + metrics.gpu_power_avg;
     if (totalPower) {
@@ -463,6 +699,7 @@ function analyzeReport(filePath, tjmax) {
     metrics,
     summaryLines,
     resolved,
+    aliasEntries,
     rows
   };
 }
