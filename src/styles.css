@@ -558,9 +558,13 @@ body {
   border-bottom: none;
 }
 
+.comparison-table th:first-child,
 .comparison-table td:first-child {
-  font-weight: 600;
-}
+    font-weight: 600;
+    width: 400px;
+    min-width: 400px;
+    max-width: 400px;
+  }
 
 .best-value {
   color: var(--color-accent);

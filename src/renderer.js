@@ -395,14 +395,14 @@ function toggleReportFilter(reportName) {
   persistFilterSettings();
 }
 
-function toggleMetricFilter(metricLabel) {
-  if (!metricLabel) {
+function toggleMetricFilter(metricKey) {
+  if (!metricKey) {
     return;
   }
-  if (state.hiddenMetrics.has(metricLabel)) {
-    state.hiddenMetrics.delete(metricLabel);
+  if (state.hiddenMetrics.has(metricKey)) {
+    state.hiddenMetrics.delete(metricKey);
   } else {
-    state.hiddenMetrics.add(metricLabel);
+    state.hiddenMetrics.add(metricKey);
   }
   if (state.currentCategory) {
     updateChart(state.currentCategory);
@@ -420,17 +420,27 @@ function renderFilterButtons(rowElement, items, hiddenSet, toggleFn) {
   }
   const seen = new Set();
   items.forEach((item) => {
-    if (!item || seen.has(item)) {
+    if (!item) {
       return;
     }
-    seen.add(item);
+    const entry =
+      typeof item === 'object'
+        ? {
+            key: item.key || item.label || '',
+            label: item.label || item.key || ''
+          }
+        : { key: item, label: item };
+    if (!entry.key || seen.has(entry.key)) {
+      return;
+    }
+    seen.add(entry.key);
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'chart-filter-button';
-    const hidden = hiddenSet.has(item);
+    const hidden = hiddenSet.has(entry.key);
     button.classList.toggle('active', !hidden);
-    button.textContent = item;
-    button.addEventListener('click', () => toggleFn(item));
+    button.textContent = entry.label;
+    button.addEventListener('click', () => toggleFn(entry.key, entry.label));
     rowElement.appendChild(button);
   });
 }
@@ -442,14 +452,27 @@ function persistFilterSettings() {
   }).catch(() => {});
 }
 
+function getMetricFilterKey(label, category) {
+  if (!label) {
+    return '';
+  }
+  return category ? `${category}::${label}` : label;
+}
+
 function renderReportFilters(chartData) {
   const labels = (chartData?.datasets ?? []).map((dataset) => getDatasetReportKey(dataset));
   renderFilterButtons(elements.chartReportFilterRow, labels, state.hiddenReports, toggleReportFilter);
 }
 
-function renderMetricFilters(chartData) {
-  const labels = (chartData?.datasets ?? []).map((dataset) => dataset.metricLabel || dataset.label || 'Métrica');
-  renderFilterButtons(elements.chartMetricFilterRow, labels, state.hiddenMetrics, toggleMetricFilter);
+function renderMetricFilters(chartData, category) {
+  const items = (chartData?.datasets ?? []).map((dataset) => {
+    const label = dataset.metricLabel || dataset.label || 'Métrica';
+    return {
+      key: getMetricFilterKey(label, category),
+      label
+    };
+  });
+  renderFilterButtons(elements.chartMetricFilterRow, items, state.hiddenMetrics, toggleMetricFilter);
 }
 
 function clearFilterRows() {
@@ -460,9 +483,10 @@ function clearFilterRows() {
   });
 }
 
-function applyDatasetFilters(dataset) {
+function applyDatasetFilters(dataset, category) {
   const reportKey = getDatasetReportKey(dataset);
-  const metricKey = dataset.metricLabel || dataset.label || '';
+  const metricLabel = dataset.metricLabel || dataset.label || '';
+  const metricKey = getMetricFilterKey(metricLabel, category);
   if (state.hiddenReports.has(reportKey)) {
     return false;
   }
@@ -472,8 +496,8 @@ function applyDatasetFilters(dataset) {
   return true;
 }
 
-function getFilteredDatasets(chartData) {
-  return (chartData?.datasets ?? []).filter(applyDatasetFilters);
+function getFilteredDatasets(chartData, category) {
+  return (chartData?.datasets ?? []).filter((dataset) => applyDatasetFilters(dataset, category));
 }
 
 function buildExportChartOptions(chartData) {
@@ -562,7 +586,7 @@ function collectChartImages() {
     if (!chartData) {
       return;
     }
-    let filteredDatasets = getFilteredDatasets(chartData).map((dataset) => ({
+    let filteredDatasets = getFilteredDatasets(chartData, category.name).map((dataset) => ({
       ...dataset,
       borderWidth: 2,
       pointRadius: 3,
@@ -570,16 +594,6 @@ function collectChartImages() {
       tension: dataset.tension ?? 0.2,
       spanGaps: dataset.spanGaps ?? true
     }));
-    if (!filteredDatasets.length) {
-      filteredDatasets = (chartData.datasets || []).map((dataset) => ({
-        ...dataset,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 4,
-        tension: dataset.tension ?? 0.2,
-        spanGaps: dataset.spanGaps ?? true
-      }));
-    }
     if (!filteredDatasets.length) {
       return;
     }
@@ -641,6 +655,10 @@ async function handleExport() {
     return;
   }
   const payload = {
+    reports: (state.result?.reports ?? []).map((report) => ({
+      name: report.name,
+      summaryLines: report.summaryLines
+    })),
     comparison: state.result.comparison ?? { headers: [], groups: [] },
     filters: {
       hiddenReports: Array.from(state.hiddenReports),
@@ -950,7 +968,11 @@ function renderChartCategories(chartCategories = [], chartData = {}) {
 }
 
 function updateChart(categoryName) {
-  const chartData = state.result?.charts?.[categoryName];
+  const activeCategory = categoryName || state.currentCategory || '';
+  if (categoryName && categoryName !== state.currentCategory) {
+    state.currentCategory = categoryName;
+  }
+  const chartData = activeCategory ? state.result?.charts?.[activeCategory] : null;
   const chartInstance = state.chartInstance;
   if (!chartInstance) return;
 
@@ -966,14 +988,14 @@ function updateChart(categoryName) {
     return;
   }
 
-  const filteredDatasets = getFilteredDatasets(chartData);
+  const filteredDatasets = getFilteredDatasets(chartData, activeCategory);
   if (!filteredDatasets.length) {
     chartInstance.data.labels = chartData.labels;
     chartInstance.data.datasets = [];
     chartInstance.update();
     elements.chartMessage.textContent = 'Nenhum conjunto visível nas configurações atuais.';
     elements.chartMessage.style.opacity = '1';
-    renderMetricFilters(chartData);
+    renderMetricFilters(chartData, activeCategory);
     renderReportFilters(chartData);
     return;
   }
@@ -1006,7 +1028,7 @@ function updateChart(categoryName) {
   chartInstance.options.scales.y.ticks.callback = (value) =>
     usePercScale ? `${value}%` : `${value}`;
   chartInstance.update();
-  renderMetricFilters(chartData);
+  renderMetricFilters(chartData, activeCategory);
   renderReportFilters(chartData);
 }
 

@@ -81,7 +81,10 @@ function createChartDataBuilder({ sanitizeValue, clampPercent }) {
           return;
         }
         const values = report.rows.map((row) => {
-          const numeric = sanitizeValue(metric.alias, row[entry.header]);
+          const numeric = sanitizeValue(
+            metric.alias,
+            entry.columnIndex != null ? row[entry.columnIndex] : undefined
+          );
           if (!Number.isFinite(numeric)) {
             return null;
           }

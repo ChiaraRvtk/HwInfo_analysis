@@ -17,72 +17,125 @@ const COLUMN_ALIASES = {
     'Uso total da CPU [%]',
     'Utilização total da CPU [%]',
     'Uso do núcleo (avg) [%]',
-    'Utilização do núcleo (avg) [%]'
+    'Utilização do núcleo (avg) [%]',
+    'Total CPU Usage [%]',
+    'Core Usage (avg) [%]',
+    'Core Utility (avg) [%]',
+    'Total CPU Utility [%]'
   ],
   cpu_effective_clock: [
     'Relógios efetivos núcleo (avg) [MHz]',
-    'Relógio efetivo médio [MHz]'
+    'Relógio efetivo médio [MHz]',
+    'Core Effective Clocks (avg) [MHz]',
+    'Average Effective Clock [MHz]'
   ],
-  cpu_temp: ['CPU Inteira [°C]', 'Temperaturas centrais (avg) [°C]', 'CPU Temperature [°C]'],
+  cpu_temp: [
+    'CPU Inteira [°C]',
+    'Temperaturas centrais (avg) [°C]',
+    'CPU Temperature [°C]',
+    'CPU Package [°C]',
+    'Core Temperatures (avg) [°C]'
+  ],
 
   //  GPU
-  max_cpu_core_temp: ['Núcleo máximo [°C]', 'CPU Inteira [°C]'],
-  gpu_clock: ['GPU Clock [MHz]', 'GPU Effective Clock [MHz]'],
-  gpu_power: ['GPU Potência [W]', 'GPU Power [W]'],
+  max_cpu_core_temp: ['Núcleo máximo [°C]', 'CPU Inteira [°C]', 'Core Max [°C]'],
+  gpu_clock: ['GPU Clock [MHz]', 'GPU Effective Clock [MHz]', 'GPU Core Clock [MHz]'],
+  gpu_power: ['GPU Potência [W]', 'GPU Power [W]', 'Total GPU Power [W]'],
   gpu_d3d_usage: [
     'Utilização de D3D GPU [%]',
     'Utilizações de D3D GPU (avg) [%]',
     'GPU D3D Uso (avg) [%]',
-    'Carga do núcleo da GPU [%]'
+    'Carga do núcleo da GPU [%]',
+    'GPU D3D Usage [%]',
+    'GPU Usage [%]',
+    'GPU Core Load [%]',
+    'GPU GT Usage [%]'
   ],
-  gpu_memory_usage: ['Uso de memória GPU [%]', 'Carga do controlador de memória GPU [%]'],
+  gpu_memory_usage: [
+    'Uso de memória GPU [%]',
+    'Carga do controlador de memória GPU [%]',
+    'GPU Memory Usage [%]',
+    'GPU Memory Controller Load [%]'
+  ],
   gpu_temp: [
     'Temperatura GPU [°C]',
     'Temperatura de ponto quente da GPU [°C]',
     'Temperatura de junção da memória GPU [°C]',
-    'GPU Hotspot Temperature [°C]'
+    'GPU Hotspot Temperature [°C]',
+    'GPU Temperature [°C]',
+    'GPU Hot Spot Temperature [°C]',
+    'GPU Memory Junction Temperature [°C]'
   ],
-  gpu_temp_limit : ['Limite térmico da GPU [°C]', 'GPU Temperature Limit [°C]'],
+  gpu_temp_limit : ['Limite térmico da GPU [°C]', 'GPU Temperature Limit [°C]', 'GPU Thermal Limit [°C]'],
   thermal_headroom: [
     'Distância do núcleo para TjMAX (avg) [°C]',
     'Distância para TjMAX [°C]',
-    'Distance to TjMAX (avg) [°C]'
+    'Distance to TjMAX (avg) [°C]',
+    'Core Distance to TjMAX (avg) [°C]'
   ],
 
   //  FPS and Frame Time
   fps_avg: [
     'Taxa de quadros Presented (avg) [FPS]',
-    'Taxa de quadros Displayed (avg) [FPS]'
+    'Taxa de quadros Displayed (avg) [FPS]',
+    'Frame Rate Presented (avg) [FPS]',
+    'Frame Rate Displayed (avg) [FPS]',
+    'Framerate Presented (avg) [FPS]',
+    'Framerate Displayed (avg) [FPS]'
   ],
   fps_1: [
     'Taxa de quadros Presented (1%) [FPS]',
     'Taxa de quadros Presented (1% low) [FPS]',
-    'Taxa de quadros Displayed (1%) [FPS]'
+    'Taxa de quadros Displayed (1%) [FPS]',
+    'Frame Rate Presented (1%) [FPS]',
+    'Frame Rate Presented (1% low) [FPS]',
+    'Frame Rate Displayed (1%) [FPS]'
   ],
   fps_01: [
     'Taxa de quadros Presented (0.1%) [FPS]',
     'Taxa de quadros Presented (0.1% low) [FPS]',
-    'Taxa de quadros Displayed (0.1%) [FPS]'
+    'Taxa de quadros Displayed (0.1%) [FPS]',
+    'Frame Rate Presented (0.1%) [FPS]',
+    'Frame Rate Presented (0.1% low) [FPS]',
+    'Frame Rate Displayed (0.1%) [FPS]'
   ],
   frame_time_series: [
     'Frame Time Presented (avg) [ms]',
-    'Frame Time Displayed (avg) [ms]'
+    'Frame Time Displayed (avg) [ms]',
+    'Frametime Presented (avg) [ms]',
+    'Frametime Displayed (avg) [ms]'
   ],
   ram_usage_percent: [
     'Carga da memória física [%]',
     'Memória física utilizada [%]',
-    'Uso de memória física [%]'
+    'Uso de memória física [%]',
+    'Physical Memory Load [%]',
+    'Physical Memory Utilization [%]'
   ],
 
   // RAM
-  ram_used_mb: ['Memória física utilizada [MB]'],
-  ram_available_mb: ['Memória física disponível [MB]'],
+  ram_used_mb: ['Memória física utilizada [MB]', 'Physical Memory Used [MB]'],
+  ram_available_mb: ['Memória física disponível [MB]', 'Physical Memory Available [MB]'],
 
   // Disk
-  disk_read_rate: ['Taxa de leituras [MB/s]', 'Leitura (MB/s)', 'Leitura de disco [MB/s]'],
-  disk_write_rate: ['Taxa de gravações [MB/s]', 'Gravação (MB/s)', 'Gravação de disco [MB/s]'],
+  disk_read_rate: [
+    'Taxa de leituras [MB/s]',
+    'Leitura (MB/s)',
+    'Leitura de disco [MB/s]',
+    'Read Rate [MB/s]',
+    'Disk Read Rate [MB/s]',
+    'Disk Read [MB/s]'
+  ],
+  disk_write_rate: [
+    'Taxa de gravações [MB/s]',
+    'Gravação (MB/s)',
+    'Gravação de disco [MB/s]',
+    'Write Rate [MB/s]',
+    'Disk Write Rate [MB/s]',
+    'Disk Write [MB/s]'
+  ],
   
-  system_power: ['Potência total do sistema [W]', 'System Total Power [W]']
+  system_power: ['Potência total do sistema [W]', 'System Total Power [W]', 'Total System Power [W]']
 };
 
 
@@ -102,6 +155,17 @@ const METRIC_BOUNDS = {
   ram_used_mb: { min: 0, max: 1048576 },
   ram_available_mb: { min: 0, max: 1048576 }
 };
+
+function padNumber(value, size = 2) {
+  return String(value).padStart(size, '0');
+}
+
+function formatDateTimeLabel(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return `${padNumber(date.getDate())}/${padNumber(date.getMonth() + 1)}/${date.getFullYear()} ${padNumber(date.getHours())}:${padNumber(date.getMinutes())}:${padNumber(date.getSeconds())}`;
+}
 
 function normalize(text = '') {
   return text
@@ -161,6 +225,125 @@ function parseCapacity(value) {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+function parseDateParts(value) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  let match = trimmed.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (match) {
+    return {
+      day: Number(match[1]),
+      month: Number(match[2]),
+      year: Number(match[3])
+    };
+  }
+  match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (match) {
+    return {
+      year: Number(match[1]),
+      month: Number(match[2]),
+      day: Number(match[3])
+    };
+  }
+  match = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    return {
+      month: Number(match[1]),
+      day: Number(match[2]),
+      year: Number(match[3])
+    };
+  }
+  return null;
+}
+
+function parseTimeParts(value) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const normalized = trimmed.replace(',', '.');
+  const segments = normalized.split(':');
+  if (segments.length < 2) {
+    return null;
+  }
+  const hours = Number(segments[0]);
+  const minutes = Number(segments[1]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return null;
+  }
+  let seconds = 0;
+  let milliseconds = 0;
+  if (segments[2] != null) {
+    const secParts = segments[2].split('.');
+    seconds = Number(secParts[0]);
+    if (!Number.isFinite(seconds)) {
+      return null;
+    }
+    if (secParts[1]) {
+      const fraction = Number(`0.${secParts[1]}`);
+      if (Number.isFinite(fraction)) {
+        milliseconds = Math.round(fraction * 1000);
+      }
+    }
+  }
+  return { hours, minutes, seconds, milliseconds };
+}
+
+function buildTimestamp(dateParts, timeParts) {
+  if (!dateParts || !timeParts) {
+    return null;
+  }
+  const year = Number(dateParts.year);
+  const month = Number(dateParts.month);
+  const day = Number(dateParts.day);
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day) ||
+    !Number.isFinite(timeParts.hours) ||
+    !Number.isFinite(timeParts.minutes) ||
+    !Number.isFinite(timeParts.seconds)
+  ) {
+    return null;
+  }
+  const date = new Date(
+    year,
+    month - 1,
+    day,
+    timeParts.hours,
+    timeParts.minutes,
+    timeParts.seconds || 0,
+    timeParts.milliseconds || 0
+  );
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return {
+    value: date.getTime(),
+    iso: date.toISOString(),
+    display: formatDateTimeLabel(date)
+  };
+}
+
+function extractBracketIndex(text = '') {
+  if (typeof text !== 'string') {
+    return null;
+  }
+  const match = text.match(/\[#(\d+)\]/i);
+  if (!match) {
+    return null;
+  }
+  const index = Number(match[1]);
+  return Number.isFinite(index) ? index : null;
+}
+
 function parseSensorLabel(label = '') {
   if (typeof label !== 'string') {
     return null;
@@ -169,17 +352,33 @@ function parseSensorLabel(label = '') {
   if (!trimmed) {
     return null;
   }
-  const gpuMatch = trimmed.match(/gpu\s*\[#(\d+)\]\s*:\s*(.+)/i);
+  const gpuMatch = trimmed.match(/gpu\s*\[#(\d+)\](.*)/i);
   if (gpuMatch) {
     const index = Number(gpuMatch[1]);
-    const name = gpuMatch[2].trim();
+    let name = gpuMatch[2]?.trim() || '';
+    name = name.replace(/^[:\-–—\s]+/, '').trim();
     const keyBase = Number.isFinite(index) ? `gpu-${index}` : normalize(name) || trimmed;
     return {
       type: 'gpu',
       index: Number.isFinite(index) ? index : null,
-      name,
+      name: name || null,
       label: trimmed,
       key: keyBase || `gpu-${trimmed.toLowerCase()}`
+    };
+  }
+  const driveMatch = trimmed.match(/^drive\s*:\s*(.+)/i);
+  if (driveMatch) {
+    const descriptor = driveMatch[1].trim();
+    const letterMatch = descriptor.match(/\[([A-Z]:)\]/i);
+    const letter = letterMatch ? letterMatch[1].toUpperCase() : null;
+    const name = descriptor.replace(/\[[^\]]+\]/, '').trim();
+    const keyBase = normalize(`${name} ${letter || ''}`.trim()) || normalize(name) || null;
+    return {
+      type: 'drive',
+      name: name || descriptor,
+      label: trimmed,
+      letter,
+      key: keyBase ? `drive-${keyBase}` : `drive-${letter || trimmed.toLowerCase()}`
     };
   }
   return {
@@ -190,33 +389,179 @@ function parseSensorLabel(label = '') {
   };
 }
 
-function collectGpuSensors(aliasEntries = {}) {
+function inferSensorInfoFromHeader(header = '', sensorLabel = '') {
+  if (typeof header !== 'string') {
+    return null;
+  }
+  const normalizedHeader = normalize(header);
+  if (!normalizedHeader) {
+    return null;
+  }
+  const label = typeof sensorLabel === 'string' ? sensorLabel.trim() : '';
+  const index = extractBracketIndex(label) ?? extractBracketIndex(header);
+  if (normalizedHeader.includes('gpu')) {
+    const labelHasGpu = /gpu/i.test(label);
+    const displayLabel = labelHasGpu ? label : header;
+    return {
+      type: 'gpu',
+      index: Number.isFinite(index) ? index : null,
+      name: labelHasGpu ? label : null,
+      label: displayLabel,
+      key: Number.isFinite(index) ? `gpu-${index}` : `gpu-${normalizedHeader}`
+    };
+  }
+  if (
+    normalizedHeader.includes('drive') ||
+    normalizedHeader.includes('disco') ||
+    normalizedHeader.includes('nvme') ||
+    normalizedHeader.includes('ssd')
+  ) {
+    const labelHasDrive = /drive/i.test(label);
+    const displayLabel = labelHasDrive ? label : header;
+    return {
+      type: 'drive',
+      letter: null,
+      name: displayLabel,
+      label: displayLabel,
+      key: `drive-${normalizedHeader}`
+    };
+  }
+  return null;
+}
+
+function mergeSensorInfo(primary, fallback) {
+  if (primary && fallback) {
+    if (primary.type === fallback.type) {
+      return { ...fallback, ...primary };
+    }
+    if (primary.type === 'other') {
+      return { ...primary, ...fallback };
+    }
+    return primary;
+  }
+  return primary || fallback || null;
+}
+
+function collectSensorsByType(aliasEntries = {}, type, options = {}) {
   const sensors = new Map();
   Object.values(aliasEntries).forEach((entries) => {
     entries.forEach((entry) => {
       const info = entry.sensorInfo;
-      if (info?.type === 'gpu') {
-        const key = info.key || entry.header;
+      if (info?.type === type) {
+        const key = info.key || `${type}-${entry.header}`;
         if (!sensors.has(key)) {
           sensors.set(key, {
             key,
             index: info.index,
             name: info.name || info.label || null,
-            label: info.label || null
+            label: info.label || entry.sensorLabel || null,
+            letter: info.letter || null
           });
         }
       }
     });
   });
-  return Array.from(sensors.values()).sort((a, b) => {
-    if (a.index != null && b.index != null) {
-      return a.index - b.index;
+  const compare =
+    typeof options.compare === 'function'
+      ? options.compare
+      : (a, b) => {
+          if (a.index != null && b.index != null) {
+            return a.index - b.index;
+          }
+          if (a.index != null) {
+            return -1;
+          }
+          if (b.index != null) {
+            return 1;
+          }
+          const nameA = a.name || a.label || a.key;
+          const nameB = b.name || b.label || b.key;
+          return nameA.localeCompare(nameB);
+        };
+  return Array.from(sensors.values()).sort(compare);
+}
+
+function normalizeBracketedSegments(row = []) {
+  if (!Array.isArray(row) || !row.length) {
+    return row;
+  }
+  const normalized = [];
+  for (let i = 0; i < row.length; i += 1) {
+    let value = row[i];
+    if (typeof value === 'string' && value.includes('[') && !value.includes(']')) {
+      const parts = [value];
+      while (i + 1 < row.length) {
+        const next = row[i + 1];
+        parts.push(next);
+        i += 1;
+        if (typeof next === 'string' && next.includes(']')) {
+          break;
+        }
+      }
+      value = parts
+        .filter((part) => part != null && part !== '')
+        .map((part) => (typeof part === 'string' ? part.trim() : part))
+        .join(', ');
     }
-    if (a.index != null) {
-      return -1;
+    normalized.push(value);
+  }
+  return normalized;
+}
+
+function findColumnIndex(columns = [], normalizedKey) {
+  const keys = Array.isArray(normalizedKey) ? normalizedKey : [normalizedKey];
+  const column = columns.find((entry) => entry && keys.includes(entry.normalized));
+  return column ? column.index : -1;
+}
+
+function computeReportPeriod(rows = [], columns = []) {
+  if (!rows.length || !columns.length) {
+    return null;
+  }
+  const dateIndex = findColumnIndex(columns, ['date', 'data']);
+  const timeIndex = findColumnIndex(columns, ['time', 'hora', 'tempo']);
+  if (dateIndex === -1 || timeIndex === -1) {
+    return null;
+  }
+  let start = null;
+  let end = null;
+  rows.forEach((row) => {
+    if (!row) {
+      return;
     }
-    if (b.index != null) {
-      return 1;
+    const timestamp = buildTimestamp(parseDateParts(row[dateIndex]), parseTimeParts(row[timeIndex]));
+    if (!timestamp) {
+      return;
+    }
+    if (!start || timestamp.value < start.value) {
+      start = timestamp;
+    }
+    if (!end || timestamp.value > end.value) {
+      end = timestamp;
+    }
+  });
+  if (!start || !end) {
+    return null;
+  }
+  return {
+    start: start.iso,
+    end: end.iso,
+    startDisplay: start.display,
+    endDisplay: end.display,
+    durationMs: Math.max(0, end.value - start.value)
+  };
+}
+
+function collectGpuSensors(aliasEntries = {}) {
+  return collectSensorsByType(aliasEntries, 'gpu');
+}
+
+function collectDriveSensors(aliasEntries = {}) {
+  return collectSensorsByType(aliasEntries, 'drive', (a, b) => {
+    const letterA = a.letter || '';
+    const letterB = b.letter || '';
+    if (letterA && letterB && letterA !== letterB) {
+      return letterA.localeCompare(letterB);
     }
     const nameA = a.name || a.label || a.key;
     const nameB = b.name || b.label || b.key;
@@ -224,23 +569,38 @@ function collectGpuSensors(aliasEntries = {}) {
   });
 }
 
-function buildResolver(headers, columnSensors = {}) {
+function buildResolver(columns = []) {
   const map = {};
-  headers.forEach((header) => {
-    const key = normalize(header);
-    if (!key) {
+  columns.forEach((column, index) => {
+    if (!column) {
       return;
     }
+    const header =
+      typeof column.header === 'string'
+        ? column.header
+        : column.header == null
+          ? `Column ${index + 1}`
+          : String(column.header);
+    const normalized = column.normalized || normalize(header);
+    if (!normalized) {
+      return;
+    }
+    const sensorLabel = column.sensorLabel || null;
+    const baseSensorInfo = column.sensorInfo || parseSensorLabel(sensorLabel);
+    const inferredSensorInfo = inferSensorInfoFromHeader(header, sensorLabel);
+    const sensorInfo = mergeSensorInfo(baseSensorInfo, baseSensorInfo);
     const entry = {
       header,
-      normalized: key,
-      sensorLabel: columnSensors[header] || null,
-      sensorInfo: parseSensorLabel(columnSensors[header])
+      normalized,
+      sensorLabel,
+      sensorInfo,
+      columnIndex: column.index != null ? column.index : index
     };
-    if (!map[key]) {
-      map[key] = [];
+    
+    if (!map[normalized]) {
+      map[normalized] = [];
     }
-    map[key].push(entry);
+    map[normalized].push(entry);
   });
   return map;
 }
@@ -250,13 +610,22 @@ function resolveColumnEntries(resolver, candidates, predicate = () => true) {
   const seen = new Set();
   const matches = [];
 
+  function entryKey(entry) {
+    if (!entry) {
+      return null;
+    }
+    const suffix = entry.columnIndex != null ? `:${entry.columnIndex}` : '';
+    return `${entry.header}${suffix}`;
+  }
+
   function addEntries(entries) {
     entries.forEach((entry) => {
-      if (!entry || seen.has(entry.header)) {
+      const key = entryKey(entry);
+      if (!entry || !key || seen.has(key)) {
         return;
       }
       if (predicate(entry)) {
-        seen.add(entry.header);
+        seen.add(key);
         matches.push(entry);
       }
     });
@@ -280,12 +649,25 @@ function resolveColumnEntries(resolver, candidates, predicate = () => true) {
   return matches;
 }
 
-function resolveColumn(resolver, candidates, predicate) {
-  const match = resolveColumnEntries(resolver, candidates, predicate)[0];
-  return match ? match.header : null;
-}
 
 function isSensorDescriptorRow(row) {
+  if (Array.isArray(row)) {
+    const normalizeField = (value) =>
+      typeof value === 'string' ? value.trim() : value == null ? '' : String(value).trim();
+    const date = normalizeField(row[0]);
+    const time = normalizeField(row[1]);
+    if (date || time) {
+      return false;
+    }
+    const values = row
+      .map((value) => (typeof value === 'string' ? value.trim() : ''))
+      .filter((value) => !!value);
+    if (!values.length) {
+      return false;
+    }
+    const descriptorCount = values.filter((value) => value.includes(':')).length;
+    return descriptorCount >= Math.min(10, Math.ceil(values.length * 0.5));
+  }
   if (!row || typeof row !== 'object') {
     return false;
   }
@@ -307,31 +689,68 @@ function isSensorDescriptorRow(row) {
 function parseCsv(filePath) {
   const raw = fs.readFileSync(filePath, 'utf-8');
   const parsed = Papa.parse(raw, {
-    header: true,
-    skipEmptyLines: true
+    header: false,
+    skipEmptyLines: false
   });
-  const headers = parsed.meta?.fields ?? [];
-  let sensorRow = null;
-  const rows = [];
-  parsed.data.forEach((row) => {
-    if (sensorRow == null && isSensorDescriptorRow(row)) {
-      sensorRow = row;
-      return;
-    }
-    if (row && (row.Date || row.Time)) {
-      rows.push(row);
-    }
-  });
-  const columnSensors = {};
-  if (sensorRow) {
-    headers.forEach((header) => {
-      const label = sensorRow[header];
-      if (typeof label === 'string' && label.trim()) {
-        columnSensors[header] = label.trim();
-      }
-    });
+  const table = Array.isArray(parsed.data)
+    ? parsed.data.filter(
+        (row) => Array.isArray(row) && row.some((value) => value != null && String(value).trim())
+      )
+    : [];
+  if (!table.length) {
+    return { rows: [], columns: [] };
   }
-  return { rows, columnSensors, headers };
+  const headerRow = table[0];
+  const bodyRows = table.slice(1);
+
+  let sensorRowIndex = -1;
+  for (let i = bodyRows.length - 1; i >= 0; i--) {
+    if (isSensorDescriptorRow(bodyRows[i])) {
+      sensorRowIndex = i;
+      break;
+    }
+  }
+  if (sensorRowIndex === -1) {
+    sensorRowIndex = bodyRows.findIndex((row) => isSensorDescriptorRow(row));
+  }
+  let sensorRow = null;
+  if (sensorRowIndex !== -1) {
+    sensorRow = bodyRows.splice(sensorRowIndex, 1)[0];
+  }
+  if (sensorRow) {
+    sensorRow = normalizeBracketedSegments(sensorRow);
+  }
+
+  const columns = headerRow.map((header, index) => {
+    const rawHeader =
+      typeof header === 'string'
+        ? header.trim()
+        : header == null
+          ? ''
+          : String(header).trim();
+    const headerText = rawHeader || `Column ${index + 1}`;
+    const normalized = normalize(rawHeader) || normalize(headerText) || `column-${index + 1}`;
+    const sensorLabel =
+      sensorRow && typeof sensorRow[index] === 'string' ? sensorRow[index].trim() : null;
+    return {
+      index,
+      header: headerText,
+      normalized,
+      sensorLabel,
+      sensorInfo: parseSensorLabel(sensorLabel)
+    };
+  });
+
+  const rows = bodyRows.filter((row) => {
+    if (!Array.isArray(row)) {
+      return false;
+    }
+    const date = typeof row[0] === 'string' ? row[0].trim() : row[0];
+    const time = typeof row[1] === 'string' ? row[1].trim() : row[1];
+    return date || time;
+  });
+
+  return { rows, columns };
 }
 
 function toNumber(value) {
@@ -418,13 +837,9 @@ function sanitizeValue(alias, value) {
 const buildChartData = createChartDataBuilder({ sanitizeValue, clampPercent });
 
 function analyzeReport(filePath, tjmax) {
-  const { rows, columnSensors, headers } = parseCsv(filePath);
-  const headerList = headers?.length
-    ? headers
-    : rows.length
-      ? Object.keys(rows[0])
-      : [];
-  const resolver = buildResolver(headerList, columnSensors);
+  const { rows, columns } = parseCsv(filePath);
+  const period = computeReportPeriod(rows, columns);
+  const resolver = buildResolver(columns);
   const resolved = {};
   const aliasEntries = {};
   Object.entries(COLUMN_ALIASES).forEach(([alias, candidates]) => {
@@ -435,8 +850,12 @@ function analyzeReport(filePath, tjmax) {
     }
   });
   const gpuSensors = collectGpuSensors(aliasEntries);
+  const driveSensors = collectDriveSensors(aliasEntries);
 
   const metrics = {};
+  if (period) {
+    metrics.period = period;
+  }
 
   function getSeries(alias, selector) {
     const entries = aliasEntries[alias];
@@ -447,7 +866,7 @@ function analyzeReport(filePath, tjmax) {
     if (!entry) {
       return [];
     }
-    return rows.map((row) => sanitizeValue(alias, row[entry.header]));
+    return rows.map((row) => sanitizeValue(alias, row[entry.columnIndex]));
   }
 
   function getGpuSeries(alias, gpuKey) {
@@ -691,7 +1110,47 @@ function analyzeReport(filePath, tjmax) {
     }
   }
 
-  const summaryLines = buildSummaryLines(rows.length, metrics, path.basename(filePath), tjmax);
+  const driveDevices = driveSensors
+    .map((sensor, index) => {
+      const accessSeries = (alias) =>
+        getSeries(alias, (entry) => entry.sensorInfo?.type === 'drive' && entry.sensorInfo.key === sensor.key);
+      const drive = {
+        key: sensor.key,
+        name: sensor.name || sensor.label || `Drive ${sensor.letter || index + 1}`,
+        letter: sensor.letter || null
+      };
+      const readSeries = accessSeries('disk_read_rate');
+      if (readSeries.length) {
+        const stats = computeStats(readSeries);
+        if (stats) {
+          drive.read_avg = stats.avg;
+          drive.read_max = stats.max;
+        }
+      }
+      const writeSeries = accessSeries('disk_write_rate');
+      if (writeSeries.length) {
+        const stats = computeStats(writeSeries);
+        if (stats) {
+          drive.write_avg = stats.avg;
+          drive.write_max = stats.max;
+        }
+      }
+      const hasData = [drive.read_avg, drive.write_avg].some((value) => value != null);
+      return hasData ? drive : null;
+    })
+    .filter(Boolean);
+
+  if (driveDevices.length) {
+    metrics.driveDevices = driveDevices;
+  }
+
+  const summaryLines = buildSummaryLines(
+    rows.length,
+    metrics,
+    path.basename(filePath),
+    tjmax,
+    period
+  );
 
   return {
     path: filePath,
@@ -1083,14 +1542,18 @@ function parseHardwareXml(filePath) {
 
 function buildComparisonPayload(reports) {
   const comparison = buildComparison(reports);
-  const charts = buildChartData(reports);
-  return { comparison, charts };
+  const chartPayload = buildChartData(reports);
+  return {
+    comparison,
+    charts: chartPayload?.charts || {},
+    chartCategories: chartPayload?.categories || []
+  };
 }
 
 function analyzeReports(reportPaths = [], options = {}) {
   const tjmax = Number(options.tjmax) || 100;
   const reports = reportPaths.map((report) => analyzeReport(report, tjmax));
-  const { comparison, charts } = buildComparisonPayload(reports);
+  const { comparison, charts, chartCategories } = buildComparisonPayload(reports);
   const hardware = parseHardwareXml(options.hardwarePath);
   return {
     reports: reports.map((report) => ({
@@ -1101,10 +1564,7 @@ function analyzeReports(reportPaths = [], options = {}) {
     })),
     comparison,
     charts,
-    chartCategories: Object.keys(CHART_CATEGORIES).map((name) => ({
-      name,
-      metrics: CHART_CATEGORIES[name]
-    })),
+    chartCategories,
     hardware
   };
 }

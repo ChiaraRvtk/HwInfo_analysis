@@ -104,16 +104,8 @@ function buildComparisonHtml(comparison) {
     .join('');
 }
 
-function buildFiltersHtml(filters = {}) {
-  const reportList = (filters.hiddenReports || []).map(escapeHtml);
-  const metricList = (filters.hiddenMetrics || []).map(escapeHtml);
-  return `
-    <section class="filter-section">
-      <h3>Filtros persistentes</h3>
-      <p><strong>Relatórios ocultos:</strong> ${reportList.length ? reportList.join(', ') : 'Nenhum'}</p>
-      <p><strong>Métricas ocultas:</strong> ${metricList.length ? metricList.join(', ') : 'Nenhum'}</p>
-    </section>
-  `;
+function buildFiltersHtml() {
+  return '';
 }
 
 function buildChartSections(charts = []) {
@@ -134,7 +126,30 @@ function buildChartSections(charts = []) {
   return `<div class="chart-grid">${cards}</div>`;
 }
 
+function buildSummaryHtml(reports = []) {
+  if (!reports?.length) {
+    return '';
+  }
+  const cards = reports
+    .map((report, index) => {
+      const name = escapeHtml(report?.name || `Relatório ${index + 1}`);
+      const periodLine =
+        Array.isArray(report?.summaryLines) &&
+        report.summaryLines.find((line) => line.startsWith('Período:'));
+      const content = periodLine ? escapeHtml(periodLine) : 'Período: --';
+      return `<p><strong>${name}:</strong> ${content}</p>`;
+    })
+    .join('');
+  return `
+    <section class="summary-section">
+      <h2>Período dos relatórios</h2>
+      ${cards}
+    </section>
+  `;
+}
+
 function buildPdfHtml(payload) {
+  const summaryHtml = buildSummaryHtml(payload.reports);
   const comparisonHtml = buildComparisonHtml(payload.comparison);
   const filtersHtml = buildFiltersHtml(payload.filters);
   const chartHtml = buildChartSections(payload.chartImages ?? []);
@@ -225,6 +240,13 @@ function buildPdfHtml(payload) {
           .summary-section {
             margin-bottom: 1rem;
           }
+          .summary-card {
+            margin-bottom: 0.75rem;
+            page-break-inside: avoid;
+          }
+          .summary-card pre {
+            margin-top: 0.25rem;
+          }
           .filter-section {
             margin-top: 1rem;
             padding-top: 0.5rem;
@@ -237,6 +259,7 @@ function buildPdfHtml(payload) {
       </head>
       <body>
         <h1>HWI Compare - Exportação</h1>
+        ${summaryHtml}
         <h2>Comparação lado a lado</h2>
         ${comparisonHtml}
         ${filtersHtml}

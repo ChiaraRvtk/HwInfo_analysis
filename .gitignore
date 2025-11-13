@@ -1,3 +1,4 @@
 hwi_electron_config.json
 node_modules/
 *.csv
+parsed_report.json
